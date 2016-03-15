@@ -3,6 +3,8 @@
 
 'use strict';
 
+var $ = jQuery;
+
 var defaults = {
     html:           true,        // Enable HTML tags in source
     xhtmlOut:       true,        // Use '/' to close single tags (<br />)
@@ -21,7 +23,7 @@ var defaults = {
     useSub:         true,
     useSup:         true,
     useToc:         true,
-    useMath:        false,
+    useMath:        true,
 
     useLinkNewWin:  false,
     useSourceLine:  false,
