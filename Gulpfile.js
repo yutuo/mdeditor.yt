@@ -137,6 +137,6 @@ gulp.task("cm-js", function () {
 gulp.task("default", function () {
     gulp.run("css");
     gulp.run("js");
-    gulp.run("cm-css");
-    gulp.run("cm-js");
+    //gulp.run("cm-css");
+    //gulp.run("cm-js");
 });

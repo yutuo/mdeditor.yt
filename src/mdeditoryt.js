@@ -26,7 +26,7 @@ var defaults = {
     useMath:        true,
 
     useLinkNewWin:  false,
-    useSourceLine:  false,
+    useSourceLine:  true,
     useCodeBlockPre:false,
     
     highlight:      true,
@@ -68,8 +68,11 @@ MdEditorYt.prototype = {
             height: (typeof this.options.height === "number") ? this.options.height + "px" : this.options.height
         });
         
+        this.preview = $('<div class="preview"></div>');
+        this.editor.append(this.preview);
+        
         this.previewContainer = $('<div class="previewContainer"></div>');
-        this.editor.append(this.previewContainer);
+        this.preview.append(this.previewContainer);
         
         this.mdValue = $('<textarea class="mdValue" name="' + this.options.mdValueName + '"></textarea>');
         this.editor.append(this.mdValue);
@@ -110,6 +113,10 @@ MdEditorYt.prototype = {
         };
         
         this.cmEditor = new CodeMirror(this.cmContainer.get(0), codeMirrorConfig);
+        
+        // 预览高度设置
+        this.preview.height(this.cmContainer.get(0).offsetHeight);
+        
         this.markdownYt = new MarkdownYt(this.options);
         
         this.save();
