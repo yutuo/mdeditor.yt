@@ -1,0 +1,48 @@
+.MdEditorYt {
+    position: relative;
+    border: 1px solid rgb(221, 221, 221);
+    /*padding-top: 40px;*/
+    margin: auto;
+}
+
+.MdEditorYt .cmContainer .CodeMirror, .MdEditorYt .previewContainer {
+    font-size: 14px;
+    font-family: Consolas, "Microsoft YaHei", 'Meiryo UI', 'Malgun Gothic', 'Segoe UI', 'Trebuchet MS', Helvetica, Monaco, courier, monospace;
+    line-height: 1.5;
+}
+
+.MdEditorYt .previewContainer pre.hljs {
+    width: 90%;
+}
+
+.MdEditorYt .cmContainer {
+    padding-right: 49%;
+    height: 100%;
+}
+
+.MdEditorYt .cmContainer .CodeMirror {
+    height: 100%;
+}
+
+.MdEditorYt .toolbar {
+    border-bottom: 1px solid rgb(221, 221, 221);
+}
+
+.MdEditorYt .previewContainer {
+    position: absolute;
+    border-left: 1px solid rgb(221, 221, 221);
+    left: 51%;
+    width: 48%;
+    height: 100%;
+    padding: 0 0.5%;
+}
+
+.MdEditorYt .mdValue {
+    display: none;
+    position: absolute;
+}
+
+.MdEditorYt .htmlValue {
+    display: none;
+    position: absolute;
+}

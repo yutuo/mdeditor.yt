@@ -1,0 +1,130 @@
+pre.hljs, pre.hljs code {
+    font-family: Consolas,Monaco,"Andale Mono","Ubuntu Mono",monospace;    
+    font-size: 13px;
+    line-height: 1.2;
+    
+    -webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+}
+
+.hljs.inline {
+    font-family: Consolas,Monaco,"Andale Mono","Ubuntu Mono",monospace;
+    font-size: 13px;
+    line-height: 1.3;
+    display: inline-block;
+    padding: 0 4px;
+    vertical-align: middle;
+}
+
+pre.hljs {
+    position: relative;
+}
+
+pre.line-numbers {
+	padding-left: 60px;
+	counter-reset: linenumber;
+}
+
+pre.line-numbers > code {
+	position: relative;
+}
+
+.line-numbers .line-numbers-rows {
+	position: absolute;
+	pointer-events: none;
+	top: 0px;
+    font-size: 100%;
+	left: -60px;
+	width: 48px;
+	letter-spacing: -1px;
+	border-right: 1px solid #999;
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.line-numbers-rows > span {
+    pointer-events: none;
+    display: block;
+    counter-increment: linenumber;
+}
+
+.line-numbers-rows > span:before {
+    content: counter(linenumber);
+    color: #999;
+    display: block;
+    padding-right: 0.8em;
+    text-align: right;
+}
+
+.show-language {
+	position: absolute;
+    color: black;
+	background-color: #CFCFCF;
+	top: 1px;
+    right: 1px;
+	border-radius: 0 0 0 5px;
+	padding: 0 8px 2px 8px;
+	z-index: 1;
+	-webkit-transform: none;
+	-moz-transform: none;
+	-ms-transform: none;
+	-o-transform: none;
+	transform: none;
+    
+    -webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.MdEditorYt {
+    position: relative;
+    border: 1px solid rgb(221, 221, 221);
+    /*padding-top: 40px;*/
+    margin: auto;
+}
+
+.MdEditorYt .cmContainer .CodeMirror, .MdEditorYt .previewContainer {
+    font-size: 14px;
+    font-family: Consolas, "Microsoft YaHei", 'Meiryo UI', 'Malgun Gothic', 'Segoe UI', 'Trebuchet MS', Helvetica, Monaco, courier, monospace;
+    line-height: 1.5;
+}
+
+.MdEditorYt .previewContainer pre.hljs {
+    width: 90%;
+}
+
+.MdEditorYt .cmContainer {
+    padding-right: 49%;
+    height: 100%;
+}
+
+.MdEditorYt .cmContainer .CodeMirror {
+    height: 100%;
+}
+
+.MdEditorYt .toolbar {
+    border-bottom: 1px solid rgb(221, 221, 221);
+}
+
+.MdEditorYt .previewContainer {
+    position: absolute;
+    border-left: 1px solid rgb(221, 221, 221);
+    left: 51%;
+    width: 48%;
+    height: 100%;
+    padding: 0 0.5%;
+}
+
+.MdEditorYt .mdValue {
+    display: none;
+    position: absolute;
+}
+
+.MdEditorYt .htmlValue {
+    display: none;
+    position: absolute;
+}

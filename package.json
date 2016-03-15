@@ -1,0 +1,42 @@
+{
+  "name": "MdEditor.yt",
+  "version": "0.0.1",
+  "description": "Open source online markdown editor.",
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yutuo/mdeditor.yt.git"
+  },
+  "keywords": [
+    "MdEditor.yt",
+    "markdown",
+    "editor"
+  ],
+  "author": "Yutuo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yutuo/mdeditor.yt/issues"
+  },
+  "homepage": "https://github.com/yutuo/mdeditor.yt",
+  "devDependencies": {
+    "dateformatter": "^0.1.0",
+    "gulp": "^3.8.11",
+    "gulp-concat": "^2.4.2",
+    "gulp-header": "^1.2.2",
+    "gulp-jshint": "^1.9.0",
+    "gulp-minify-css": "^0.4.4",
+    "gulp-notify": "^2.1.0",
+    "gulp-rename": "^1.2.0",
+    "gulp-replace": "^0.5.3",
+    "gulp-ruby-sass": "^1.0.1",
+    "gulp-uglifyjs": "^0.6.1",
+    "gulp-util": "^3.0.1"
+  }
+}
