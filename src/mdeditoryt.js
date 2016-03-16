@@ -51,8 +51,7 @@ var defaults = {
     htmlValueName: '',
     
 };
-
-            
+ 
 var timer;
 var MdEditorYt = function() {};
 
@@ -60,6 +59,7 @@ MdEditorYt.prototype = {
     options: {},
     init: function (id, settingOptions) {
         this.options = $.extend(true, defaults, settingOptions);
+        this.options.useSourceLine = this.options.syncScrolling ? true : this.options.useSourceLine;
         // Editor的设置
         this.editor = (typeof id === "object") ? $(id) : $("#" + id);
         this.editor.addClass('MdEditorYt');
@@ -113,7 +113,7 @@ MdEditorYt.prototype = {
         };
         
         this.cmEditor = new CodeMirror(this.cmContainer.get(0), codeMirrorConfig);
-        
+
         // 预览高度设置
         this.preview.height(this.cmContainer.get(0).offsetHeight);
         
@@ -121,19 +121,26 @@ MdEditorYt.prototype = {
         
         this.save();
         this.bindChangeEvent();
-        
+
         return this;
     },
-    
+
     bindChangeEvent: function () {
         var _this = this;
         this.cmEditor.on("change", function () {
             timer = setTimeout(function () {
                 clearTimeout(timer);
                 _this.save();
+                _this.cmEditorScroll(_this);
                 timer = null;
             }, _this.options.delay);
         });
+        
+        if (this.options.syncScrolling) {
+            this.preview.bind("scroll", function() { _this.previewScroll(_this) });
+            this.cmEditor.on("scroll", function() { _this.cmEditorScroll(_this) });
+        }
+        
         return this;
     },
     
@@ -143,251 +150,156 @@ MdEditorYt.prototype = {
         }
         
         var mdValue = this.cmEditor.getValue();
-        this.mdValue.val(mdValue);
-        
+        if (this.options.mdValueName) {
+            this.mdValue.val(mdValue);
+        }
+
         var htmlValue = this.markdownYt.render(mdValue);
-        this.htmlValue.val(htmlValue);
+        if (this.options.htmlValueName) {
+            this.htmlValue.val(htmlValue.replace(/(<\w+[^>]*) data-source-line=(['"])\d+\2([^>]*>)/g, "$1$3"));
+        }
         
         this.previewContainer.html(htmlValue);
     },
     
-    // scroll
+    isScrolling: false,    
+    previewScroll: function(_this) {
+        if (_this.isScrolling) {
+            return;
+        }
+        _this.isScrolling = true;
+        console.log("previewScroll");
+        var lineMarkers = _this.previewContainer.find('[data-source-line]');
+        
+        function getPreviewScroll() {
+            var scroll = _this.preview.scrollTop();
+            var lastMarker = false;
+            var nextMarker = false;
+            
+            for (var i = 0; i < lineMarkers.length; i++) {
+                if (lineMarkers[i].offsetTop < scroll) {
+                    lastMarker = i;
+                } else {
+                    nextMarker = i;
+                    break;
+                }
+            }
+            var lastLine = 0;
+            var nextLine = _this.previewContainer.outerHeight() - _this.preview.outerHeight();
+            if (lastMarker !== false) {
+                lastLine = lineMarkers[lastMarker].offsetTop;
+            }
+            if (nextMarker !== false) {
+                nextLine = lineMarkers[nextMarker].offsetTop;
+            }
+            var percentage = 0;
+            if (nextLine !== lastLine) {
+                percentage = (scroll - lastLine) / (nextLine - lastLine);
+            }
+
+            return { lastMarker: lastMarker, nextMarker: nextMarker, percentage: percentage };
+        }
+        
+        function setEditorScroll(previewScroll) {
+            var lines = [];
+            lineMarkers.each(function() {
+                lines.push($(this).data('source-line'));
+            });
+
+            var pLines = [];
+            var pLine = 0;
+            for (var i = 0; i < lines[lines.length - 1]; i++) {
+                if ($.inArray(i + 1, lines) !== -1) {
+                    pLines.push(pLine);
+                }
+                pLine +=  _this.cmEditor.getLineHandle(i).height / _this.cmEditor.display.cachedTextHeight;
+            }
+            
+            var lastLine = 0;
+            var nextLine = _this.cmEditor.lineCount() - 1;
+            if (previewScroll.lastMarker !== false) {
+                lastLine = pLines[previewScroll.lastMarker]
+            }
+            if (previewScroll.nextMarker !== false) {
+                nextLine = pLines[previewScroll.nextMarker]
+            }
+            var scrollTop = ((nextLine - lastLine) * previewScroll.percentage + lastLine) * _this.cmEditor.display.cachedTextHeight;
+            _this.cmEditor.scrollTo(0, scrollTop);
+        }
+        
+        setEditorScroll(getPreviewScroll());
+        
+        setTimeout(function() { _this.isScrolling = false; }, 30);
+    },
     
-    // test: function() {
-    //     var scrollingSide = null;
-    //     var timeoutHandle = null;
+    cmEditorScroll: function(_this) {
+        if (_this.isScrolling) {
+            return;
+        }
+        _this.isScrolling = true;
+        
+        console.log("cmEditorScroll");
+        var lineMarkers = _this.previewContainer.find('[data-source-line]');
+        
+        function getEditorScroll() {
+            var lines = [];
+            lineMarkers.each(function() {
+                lines.push($(this).data('source-line'));
+            });
 
-    //     function scrollSide(side, howToScroll) {
-    //         if (scrollingSide != null && scrollingSide != side) {
-    //             return; // the other side hasn't finished scrolling
-    //         }
-    //         scrollingSide = side
-    //         clearTimeout(timeoutHandle);
-    //         timeoutHandle = setTimeout(function() { scrollingSide = null; }, 512);
-    //         howToScroll();
-    //     }
+            var pLines = [];
+            var pLine = 0;
+            for (var i = 0; i < lines[lines.length - 1]; i++) {
+                if ($.inArray(i + 1, lines) !== -1) {
+                    pLines.push(pLine);
+                }
+                pLine +=  _this.cmEditor.getLineHandle(i).height / _this.cmEditor.display.cachedTextHeight;
+            }
 
-    //     function scrollEditor(scrollTop, when) {
-    //         setTimeout(function() {
-    //             editor.session.setScrollTop(scrollTop);
-    //         }, when);
-    //     }
-    //     function scrollLeft(scrollTop) {
-    //         scrollSide('left', function() {
-    //             var current = editor.session.getScrollTop();
-    //             var step = (scrollTop - current) / 8;
-    //             for (var i = 1; i < 8; i++) { // to create some animation
-    //                 scrollEditor(current + step * i, 128 / 8 * i);
-    //             }
-    //             scrollEditor(scrollTop, 128);
-    //         });
-    //     }
+            var currentLine = _this.cmEditor.getScrollInfo().top / _this.cmEditor.display.cachedTextHeight;
+            var lastMarker = false;
+            var nextMarker = false;
+            for (var i = 0; i < pLines.length; i++) {
+                if (pLines[i] < currentLine) {
+                    lastMarker = i;
+                } else {
+                    nextMarker = i;
+                    break;
+                }
+            } 
+            var lastLine = 0;
+            var nextLine = _this.cmEditor.lineCount() - 1; 
+            if (lastMarker !== false) {
+                lastLine = pLines[lastMarker];
+            }
+            if (nextMarker !== false) {
+                nextLine = pLines[nextMarker];
+            } 
+            var percentage = 0;
+            if (nextLine !== lastLine) {
+                percentage = (currentLine - lastLine) / (nextLine - lastLine);
+            }
+            
+            return { lastMarker: lines[lastMarker], nextMarker: lines[nextMarker], percentage: percentage };
+        }
 
-    //     function scrollRight(scrollTop) {
-    //         scrollSide('right', function() {
-    //             $('.ui-layout-east').animate({ scrollTop: scrollTop }, 128);
-    //         });
-    //     }
-
-
-
-    //     function get_editor_scroll() {
-    //         var line_markers = $('article#preview > [data-source-line]');
-    //         var lines = []; // logical line
-    //         line_markers.each(function() {
-    //             lines.push($(this).data('source-line'));
-    //         });
-    //         var pLines = []; // physical line
-    //         var pLine = 0;
-    //         for (var i = 0; i < lines[lines.length - 1]; i++) {
-    //             if ($.inArray(i + 1, lines) !== -1) {
-    //                 pLines.push(pLine);
-    //             }
-    //             pLine += editor.session.getRowLength(i); // line height might not be 1 because of wrap
-    //         }
-    //         var currentLine = editor.session.getScrollTop() / editor.renderer.lineHeight; // current physical line
-    //         var lastMarker = false;
-    //         var nextMarker = false;
-    //         for (var i = 0; i < pLines.length; i++) {
-    //             if (pLines[i] < currentLine) {
-    //                 lastMarker = i;
-    //             } else {
-    //                 nextMarker = i;
-    //                 break;
-    //             }
-    //         } // between last marker and next marker
-    //         var lastLine = 0;
-    //         var nextLine = editor.session.getScreenLength() - 1; // on the top of last physical line, so -1
-    //         if (lastMarker !== false) {
-    //             lastLine = pLines[lastMarker];
-    //         }
-    //         if (nextMarker !== false) {
-    //             nextLine = pLines[nextMarker];
-    //         } // physical lines of two neighboring markers
-    //         var percentage = 0;
-    //         if (nextLine !== lastLine) { // at the beginning of file, equal, but cannot divide by 0
-    //             percentage = (currentLine - lastLine) / (nextLine - lastLine);
-    //         } // scroll percentage between two markers
-    //         // returns two neighboring markers' logical lines, and current scroll percentage between two markers
-    //         return { lastMarker: lines[lastMarker], nextMarker: lines[nextMarker], percentage: percentage };
-    //     }
-
-    //     function set_preview_scroll(editor_scroll) {
-    //         var lastPosition = 0;
-    //         var nextPosition = $('article#preview').outerHeight() - $('.ui-layout-east').height(); // maximum scroll
-    //         if (editor_scroll.lastMarker !== undefined) { // no marker at very start
-    //             lastPosition = $('article#preview').find('>[data-source-line="' + editor_scroll.lastMarker + '"]').get(0).offsetTop;
-    //         }
-    //         if (editor_scroll.nextMarker !== undefined) { // no marker at very end
-    //             nextPosition = $('article#preview').find('>[data-source-line="' + editor_scroll.nextMarker + '"]').get(0).offsetTop;
-    //         }
-    //         var scrollTop = lastPosition + (nextPosition - lastPosition) * editor_scroll.percentage; // right scroll according to left percentage
-    //         scrollRight(scrollTop);
-    //     }
-
-    //     function get_preview_scroll() {
-    //         var scroll = $('.ui-layout-east').scrollTop();
-    //         var lastMarker = false;
-    //         var nextMarker = false;
-    //         var line_markers = $('article#preview > [data-source-line]');
-    //         for (var i = 0; i < line_markers.length; i++) {
-    //             if (line_markers[i].offsetTop < scroll) {
-    //                 lastMarker = i;
-    //             } else {
-    //                 nextMarker = i;
-    //                 break;
-    //             }
-    //         }
-    //         var lastLine = 0;
-    //         var nextLine = $('article#preview').outerHeight() - $('.ui-layout-east').height(); // maximum scroll
-    //         if (lastMarker !== false) {
-    //             lastLine = line_markers[lastMarker].offsetTop;
-    //         }
-    //         if (nextMarker !== false) {
-    //             nextLine = line_markers[nextMarker].offsetTop;
-    //         }
-    //         var percentage = 0;
-    //         if (nextLine !== lastLine) {
-    //             percentage = (scroll - lastLine) / (nextLine - lastLine);
-    //         }
-    //         // returns two neighboring markers' No., and current scroll percentage between two markers
-    //         return { lastMarker: lastMarker, nextMarker: nextMarker, percentage: percentage };
-    //     }
-
-    //     function set_editor_scroll(preview_scroll) {
-    //         var line_markers = $('article#preview > [data-source-line]');
-    //         var lines = []; // logical line
-    //         line_markers.each(function() {
-    //             lines.push($(this).data('source-line'));
-    //         });
-    //         var pLines = []; // physical line
-    //         var pLine = 0;
-    //         for (var i = 0; i < lines[lines.length - 1]; i++) {
-    //             if ($.inArray(i + 1, lines) !== -1) {
-    //                 pLines.push(pLine);
-    //             }
-    //             pLine += editor.session.getRowLength(i) // line height might not be 1 because of wrap
-    //         }
-    //         var lastLine = 0;
-    //         var nextLine = editor.session.getScreenLength() - 1; // on the top of last physical line, so -1
-    //         if (preview_scroll.lastMarker !== false) {
-    //             lastLine = pLines[preview_scroll.lastMarker]
-    //         }
-    //         if (preview_scroll.nextMarker !== false) {
-    //             nextLine = pLines[preview_scroll.nextMarker]
-    //         }
-    //         var scrollTop = ((nextLine - lastLine) * preview_scroll.percentage + lastLine) * editor.renderer.lineHeight;
-    //         scrollLeft(scrollTop);
-    //     }
-
-
-
-    //     var sync_preview = _.debounce(function() { // sync right with left
-    //         if (layout.state.east.isClosed) {
-    //             return; // no need to sync if panel closed
-    //         }
-    //         if (scrollingSide != 'left') {
-    //             set_preview_scroll(get_editor_scroll());
-    //         }
-    //     }, 128, false);
-
-    //     var sync_editor = _.debounce(function() { // sync left with right
-    //         if (layout.state.east.isClosed) {
-    //             return; // no need to sync if panel closed
-    //         }
-    //         if (scrollingSide != 'right') {
-    //             set_editor_scroll(get_preview_scroll());
-    //         }
-    //     }, 128, false);
-    // },
-    
-//     editor.session.on('changeScrollTop', function(scroll) {
-//     sync_preview(); // right scroll with left
-//   });
-    
-//     $('.ui-layout-east').scroll(function() { // left scroll with right
-//     sync_editor();
-//   });
-
-// var cmBindScroll = function() {    
-//                 codeMirror.find(".CodeMirror-scroll").bind(mouseOrTouch("scroll", "touchmove"), function(event) {
-//                     var height    = $(this).height();
-//                     var scrollTop = $(this).scrollTop();                    
-//                     var percent   = (scrollTop / $(this)[0].scrollHeight);
-                    
-//                     var tocHeight = 0;
-                    
-//                     preview.find(".markdown-toc-list").each(function(){
-//                         tocHeight += $(this).height();
-//                     });
-                    
-//                     var tocMenuHeight = preview.find(".editormd-toc-menu").height();
-//                     tocMenuHeight = (!tocMenuHeight) ? 0 : tocMenuHeight;
-
-//                     if (scrollTop === 0) 
-//                     {
-//                         preview.scrollTop(0);
-//                     } 
-//                     else if (scrollTop + height >= $(this)[0].scrollHeight - 16)
-//                     { 
-//                         preview.scrollTop(preview[0].scrollHeight);                        
-//                     } 
-//                     else
-//                     {
-//                         preview.scrollTop((preview[0].scrollHeight  + tocHeight + tocMenuHeight) * percent);
-//                     }
-                    
-//                     $.proxy(settings.onscroll, _this)(event);
-//                 });
-//             };
-
-
-//  var previewBindScroll = function() {
-                
-//                 preview.bind(mouseOrTouch("scroll", "touchmove"), function(event) {
-//                     var height    = $(this).height();
-//                     var scrollTop = $(this).scrollTop();         
-//                     var percent   = (scrollTop / $(this)[0].scrollHeight);
-//                     var codeView  = codeMirror.find(".CodeMirror-scroll");
-
-//                     if(scrollTop === 0) 
-//                     {
-//                         codeView.scrollTop(0);
-//                     }
-//                     else if (scrollTop + height >= $(this)[0].scrollHeight)
-//                     {
-//                         codeView.scrollTop(codeView[0].scrollHeight);                        
-//                     }
-//                     else 
-//                     {
-//                         codeView.scrollTop(codeView[0].scrollHeight * percent);
-//                     }
-                    
-//                     $.proxy(settings.onpreviewscroll, _this)(event);
-//                 });
-
-//             };
-    
+        function setPreviewScroll(editorScroll) {
+            var lastPosition = 0;
+            var nextPosition = _this.previewContainer.outerHeight() - _this.preview.outerHeight();
+            if (editorScroll.lastMarker !== undefined) {
+                lastPosition = _this.previewContainer.find('>[data-source-line="' + editorScroll.lastMarker + '"]').get(0).offsetTop;
+            }
+            if (editorScroll.nextMarker !== undefined) {
+                nextPosition = _this.previewContainer.find('>[data-source-line="' + editorScroll.nextMarker + '"]').get(0).offsetTop;
+            }
+            var scrollTop = lastPosition + (nextPosition - lastPosition) * editorScroll.percentage;
+            _this.preview.scrollTop(scrollTop);
+        }
+        
+        setPreviewScroll(getEditorScroll());
+        
+        setTimeout(function() { _this.isScrolling = false; }, 30);
+    },    
 } 
 
 module.exports = function(id, settingOptions) {

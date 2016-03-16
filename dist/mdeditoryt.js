@@ -10000,7 +10000,8 @@ module.exports = function sup_plugin(md) {
 
 },{}]},{},[1])(1)
 });
-/*! markdown-it-toc 1.0.0 https://github.com/samchrisinger/markdown-it-toc @license MIT */(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.markdownitToc = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/*! markdown-it-toc 1.0.0 https://github.com/samchrisinger/markdown-it-toc @license MIT */(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.markdownitToc = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}
+)({1:[function(require,module,exports){
 // Process @[toc](|Title)
 
 'use strict';
@@ -10009,8 +10010,11 @@ module.exports = function(md) {
 
     var TOC_REGEXP = /^\[toc\]$/im;
     var gstate;
+    var matchedToc = false;
 
     function toc(state, silent) {
+        matchedToc = false;
+
         while (state.src.indexOf('\n') >= 0 && state.src.indexOf('\n') < state.src.indexOf('[toc]')) {
             if (state.tokens.slice(-1)[0].type === 'softbreak') {
                 state.src = state.src.split('\n').slice(1).join('\n');
@@ -10055,18 +10059,19 @@ module.exports = function(md) {
         }
         state.pos = offset;
 
+        matchedToc = true;
         return true;
     }
 
-    md.renderer.rules.heading_open = function(tokens, index) {
+    md.renderer.rules.heading_open = function(tokens, index, options, env, self) {
         var level = tokens[index].tag;
         var label = tokens[index + 1];
-        if (label.type === 'inline') {
+        var resultHtml = self.renderToken(tokens, index, options, env);
+        if (matchedToc && label.type === 'inline') {
             var anchor = label.map[0];
-            return '<' + level + '><a id="' + anchor + '"></a>';
-        } else {
-            return '</h1>';
+            resultHtml += '<a id="mdToc' + anchor + '"></a>';
         }
+        return resultHtml;
     };
 
     md.renderer.rules.toc_open = function(tokens, index) {
@@ -10083,22 +10088,25 @@ module.exports = function(md) {
         var headings = [];
         var gtokens = gstate.tokens;
         var size = gtokens.length;
+        var minLevel = 999999;
         for (var i = 0; i < size; i++) {
             if (gtokens[i].type !== 'heading_close') {
                 continue;
             }
             var token = gtokens[i];
             var heading = gtokens[i - 1];
+            var level = +token.tag.substr(1, 1);
+            minLevel = level < minLevel ? level : minLevel;
             if (heading.type === 'inline') {
                 headings.push({
-                    level: +token.tag.substr(1, 1),
+                    level: level,
                     anchor: heading.map[0],
                     content: heading.content
                 });
             }
         }
 
-        var indent = 0;
+        var indent = minLevel - 1;
         var list = headings.map(function(heading) {
             var res = [];
             if (heading.level > indent) {
@@ -10114,7 +10122,7 @@ module.exports = function(md) {
                     indent--;
                 }
             }
-            res = res.concat(['<li><a href="#', heading.anchor, '">', heading.content, '</a></li>']);
+            res = res.concat(['<li><a href="#mdToc', heading.anchor, '">', heading.content, '</a></li>']);
             return res.join('');
         });
 
@@ -10672,25 +10680,29 @@ module.exports = function(settingOptions) {
         });
     }
 
-    markdownYt.tags = {};
-    markdownYt.renderer.renderToken = function(tokens, idx, options) {
-        var token = tokens[idx];
-        var tag = token.type;
-        var mainTag = '';
-        if(tag.match(/_open$/im)) {
-            mainTag = tag.substr(0, tag.length - 5);
-            markdownYt.tags[mainTag] = (markdownYt.tags[mainTag] || 0) + 1;
+    markdownYt.renderer.render = function(tokens, options, env) {
+        var i, len, type,
+            result = '',
+            rules = this.rules;
 
-            // source map
-            if(options.useSourceLine && token.level == 0 && token.map != null) {
-                token.attrPush(['data-source-line', token.map[0] + 1]);
+        for (i = 0, len = tokens.length; i < len; i++) {
+
+            if (options.useSourceLine && tokens[i].type.match(/_open$/i) && tokens[i].level === 0 && tokens[i].map != null) {
+                tokens[i].attrPush(['data-source-line', tokens[i].map[0] + 1]);
             }
-        } else if (tag.match(/_close$/im)) {
-            mainTag = tag.substr(0, tag.length - 6);
-            markdownYt.tags[mainTag] = (markdownYt.tags[mainTag] || 0) - 1;
+
+            type = tokens[i].type;
+
+            if (type === 'inline') {
+                result += this.renderInline(tokens[i].children, options, env);
+            } else if (typeof rules[type] !== 'undefined') {
+                result += rules[tokens[i].type](tokens, i, options, env, this);
+            } else {
+                result += this.renderToken(tokens, i, options, env);
+            }
         }
 
-        return markdownYt.renderer.constructor.prototype.renderToken.call(this, tokens, idx, options);
+        return result;
     };
 
     markdownYt.renderer.rules.code_inline = function(tokens, idx, options) {
@@ -10725,7 +10737,7 @@ module.exports = function(settingOptions) {
         var langName = token.info.trim();
         var sourceLineString = options.useSourceLine ? ' data-source-line="' + (token.map[0] + 1) + '"': '';
 
-        if(options.useMath && /math/im.test(langName)) {
+        if(options.useMath && /math/i.test(langName)) {
             return formatMathContent(code, true, sourceLineString);
         }
 
@@ -10827,8 +10839,7 @@ var defaults = {
     htmlValueName: '',
     
 };
-
-            
+ 
 var timer;
 var MdEditorYt = function() {};
 
@@ -10836,6 +10847,7 @@ MdEditorYt.prototype = {
     options: {},
     init: function (id, settingOptions) {
         this.options = $.extend(true, defaults, settingOptions);
+        this.options.useSourceLine = this.options.syncScrolling ? true : this.options.useSourceLine;
         // Editor的设置
         this.editor = (typeof id === "object") ? $(id) : $("#" + id);
         this.editor.addClass('MdEditorYt');
@@ -10889,7 +10901,7 @@ MdEditorYt.prototype = {
         };
         
         this.cmEditor = new CodeMirror(this.cmContainer.get(0), codeMirrorConfig);
-        
+
         // 预览高度设置
         this.preview.height(this.cmContainer.get(0).offsetHeight);
         
@@ -10897,19 +10909,26 @@ MdEditorYt.prototype = {
         
         this.save();
         this.bindChangeEvent();
-        
+
         return this;
     },
-    
+
     bindChangeEvent: function () {
         var _this = this;
         this.cmEditor.on("change", function () {
             timer = setTimeout(function () {
                 clearTimeout(timer);
                 _this.save();
+                _this.cmEditorScroll(_this);
                 timer = null;
             }, _this.options.delay);
         });
+        
+        if (this.options.syncScrolling) {
+            this.preview.bind("scroll", function() { _this.previewScroll(_this) });
+            this.cmEditor.on("scroll", function() { _this.cmEditorScroll(_this) });
+        }
+        
         return this;
     },
     
@@ -10919,15 +10938,156 @@ MdEditorYt.prototype = {
         }
         
         var mdValue = this.cmEditor.getValue();
-        this.mdValue.val(mdValue);
-        
+        if (this.options.mdValueName) {
+            this.mdValue.val(mdValue);
+        }
+
         var htmlValue = this.markdownYt.render(mdValue);
-        this.htmlValue.val(htmlValue);
+        if (this.options.htmlValueName) {
+            this.htmlValue.val(htmlValue.replace(/(<\w+[^>]*) data-source-line=(['"])\d+\2([^>]*>)/g, "$1$3"));
+        }
         
         this.previewContainer.html(htmlValue);
-    }
+    },
     
+    isScrolling: false,    
+    previewScroll: function(_this) {
+        if (_this.isScrolling) {
+            return;
+        }
+        _this.isScrolling = true;
+        console.log("previewScroll");
+        var lineMarkers = _this.previewContainer.find('[data-source-line]');
+        
+        function getPreviewScroll() {
+            var scroll = _this.preview.scrollTop();
+            var lastMarker = false;
+            var nextMarker = false;
+            
+            for (var i = 0; i < lineMarkers.length; i++) {
+                if (lineMarkers[i].offsetTop < scroll) {
+                    lastMarker = i;
+                } else {
+                    nextMarker = i;
+                    break;
+                }
+            }
+            var lastLine = 0;
+            var nextLine = _this.previewContainer.outerHeight() - _this.preview.outerHeight();
+            if (lastMarker !== false) {
+                lastLine = lineMarkers[lastMarker].offsetTop;
+            }
+            if (nextMarker !== false) {
+                nextLine = lineMarkers[nextMarker].offsetTop;
+            }
+            var percentage = 0;
+            if (nextLine !== lastLine) {
+                percentage = (scroll - lastLine) / (nextLine - lastLine);
+            }
+
+            return { lastMarker: lastMarker, nextMarker: nextMarker, percentage: percentage };
+        }
+        
+        function setEditorScroll(previewScroll) {
+            var lines = [];
+            lineMarkers.each(function() {
+                lines.push($(this).data('source-line'));
+            });
+
+            var pLines = [];
+            var pLine = 0;
+            for (var i = 0; i < lines[lines.length - 1]; i++) {
+                if ($.inArray(i + 1, lines) !== -1) {
+                    pLines.push(pLine);
+                }
+                pLine +=  _this.cmEditor.getLineHandle(i).height / _this.cmEditor.display.cachedTextHeight;
+            }
+            
+            var lastLine = 0;
+            var nextLine = _this.cmEditor.lineCount() - 1;
+            if (previewScroll.lastMarker !== false) {
+                lastLine = pLines[previewScroll.lastMarker]
+            }
+            if (previewScroll.nextMarker !== false) {
+                nextLine = pLines[previewScroll.nextMarker]
+            }
+            var scrollTop = ((nextLine - lastLine) * previewScroll.percentage + lastLine) * _this.cmEditor.display.cachedTextHeight;
+            _this.cmEditor.scrollTo(0, scrollTop);
+        }
+        
+        setEditorScroll(getPreviewScroll());
+        
+        setTimeout(function() { _this.isScrolling = false; }, 30);
+    },
     
+    cmEditorScroll: function(_this) {
+        if (_this.isScrolling) {
+            return;
+        }
+        _this.isScrolling = true;
+        
+        console.log("cmEditorScroll");
+        var lineMarkers = _this.previewContainer.find('[data-source-line]');
+        
+        function getEditorScroll() {
+            var lines = [];
+            lineMarkers.each(function() {
+                lines.push($(this).data('source-line'));
+            });
+
+            var pLines = [];
+            var pLine = 0;
+            for (var i = 0; i < lines[lines.length - 1]; i++) {
+                if ($.inArray(i + 1, lines) !== -1) {
+                    pLines.push(pLine);
+                }
+                pLine +=  _this.cmEditor.getLineHandle(i).height / _this.cmEditor.display.cachedTextHeight;
+            }
+
+            var currentLine = _this.cmEditor.getScrollInfo().top / _this.cmEditor.display.cachedTextHeight;
+            var lastMarker = false;
+            var nextMarker = false;
+            for (var i = 0; i < pLines.length; i++) {
+                if (pLines[i] < currentLine) {
+                    lastMarker = i;
+                } else {
+                    nextMarker = i;
+                    break;
+                }
+            } 
+            var lastLine = 0;
+            var nextLine = _this.cmEditor.lineCount() - 1; 
+            if (lastMarker !== false) {
+                lastLine = pLines[lastMarker];
+            }
+            if (nextMarker !== false) {
+                nextLine = pLines[nextMarker];
+            } 
+            var percentage = 0;
+            if (nextLine !== lastLine) {
+                percentage = (currentLine - lastLine) / (nextLine - lastLine);
+            }
+            
+            return { lastMarker: lines[lastMarker], nextMarker: lines[nextMarker], percentage: percentage };
+        }
+
+        function setPreviewScroll(editorScroll) {
+            var lastPosition = 0;
+            var nextPosition = _this.previewContainer.outerHeight() - _this.preview.outerHeight();
+            if (editorScroll.lastMarker !== undefined) {
+                lastPosition = _this.previewContainer.find('>[data-source-line="' + editorScroll.lastMarker + '"]').get(0).offsetTop;
+            }
+            if (editorScroll.nextMarker !== undefined) {
+                nextPosition = _this.previewContainer.find('>[data-source-line="' + editorScroll.nextMarker + '"]').get(0).offsetTop;
+            }
+            var scrollTop = lastPosition + (nextPosition - lastPosition) * editorScroll.percentage;
+            _this.preview.scrollTop(scrollTop);
+        }
+        
+        setPreviewScroll(getEditorScroll());
+        
+        setTimeout(function() { _this.isScrolling = false; }, 30);
+    },    
 } 
 
 module.exports = function(id, settingOptions) {
