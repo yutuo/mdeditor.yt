@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>markdown-it demo</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="css/main.css">
+
+    <script src="../lib/jquery/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="../lib/codemirror/codemirror.min.css">
+    <script src="../lib/codemirror/codemirror.min.js"></script>
+
+    <link rel="stylesheet" href="../lib/katex/katex.min.css">
+    <script src="../lib/katex/katex.min.js"></script>
+
+    <link rel="stylesheet" href="../lib/highlightjs/styles/androidstudio.css">
+    <script src="../lib/highlightjs/highlight.min.js"></script>
+
+    <link rel="stylesheet" href="../lib/markdownyt/markdownyt.css">    
+    <script src="../lib/markdownyt/markdownyt.min.js"></script>
+    
+    <link rel="stylesheet" href="../css/mdeditoryt.css">
+    <script src="../src/mdeditoryt.js"></script>
+    
+    <script>
+        $(function(){
+            var mdEditorYt = MdEditorYt('testMdEditor', {
+                width: '90%',
+                height: 800,
+                value: '# Test',
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+    <h1 class="title">MdEditor Test</h1>
+    <div id="testMdEditor"></div>
+</div>
+</body>
+</html>
