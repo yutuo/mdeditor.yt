@@ -11,7 +11,7 @@
     line-height: 1.5;
 }
 
-.MdEditorYt .previewContainer {
+.MdEditorYt .previewContainer, .MdEditorYt .previewContainer p {
     font-size: 14px;
     font-family: "Microsoft YaHei", 'Meiryo UI', 'Malgun Gothic', 'Segoe UI', 'Trebuchet MS', Helvetica, Monaco, courier, monospace;
     line-height: 1.5;
