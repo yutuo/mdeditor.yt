@@ -10830,6 +10830,12 @@ var defaults = {
     autoCloseTags: true,
     readOnly: false,
     indentUnit: 4,
+    matchBrackets: true,
+    indentWithTabs: true,
+    styleSelectedText: true,
+    matchWordHighlight: true,
+    autoCloseBrackets: true,
+    showTrailingSpace: true,
     value: '',
     
     delay: 300,
@@ -10889,15 +10895,15 @@ MdEditorYt.prototype = {
             //         cm.foldCode(cm.getCursor());
             //     }
             // },
-            // foldGutter: settings.codeFold,
-            // gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-            // matchBrackets: settings.matchBrackets,
-            // indentWithTabs: settings.indentWithTabs,
-            // styleActiveLine: settings.styleActiveLine,
-            // styleSelectedText: settings.styleSelectedText,
-            // autoCloseBrackets: settings.autoCloseBrackets,
-            // showTrailingSpace: settings.showTrailingSpace,
-            // highlightSelectionMatches: ( (!settings.matchWordHighlight) ? false : {showToken: (settings.matchWordHighlight === "onselected") ? false : /\w/} )
+            foldGutter: this.options.codeFold,
+            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+            matchBrackets: this.options.matchBrackets,
+            indentWithTabs: this.options.indentWithTabs,
+            styleActiveLine: this.options.styleActiveLine,
+            styleSelectedText: this.options.styleSelectedText,
+            autoCloseBrackets: this.options.autoCloseBrackets,
+            showTrailingSpace: this.options.showTrailingSpace,
+            highlightSelectionMatches: ( (!this.options.matchWordHighlight) ? false : {showToken: (this.options.matchWordHighlight === "onselected") ? false : /\w/} )
         };
         
         this.cmEditor = new CodeMirror(this.cmContainer.get(0), codeMirrorConfig);
