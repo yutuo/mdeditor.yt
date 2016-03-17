@@ -10573,68 +10573,74 @@ var langNamesForDisplay = {
     'zep': 'Zephir',
 }
 
-function makeErrorMark(title, content) {
-    return "<mark style=\"background-color: red;\" title=\"" + title + "\">" + content + "</mark>";
-}
 
-function formatMathContent(mathContent, displayMode, sourceLineString, options) {
-    var result = '';
-    if (typeof katex === "undefined") {
-        result = makeErrorMark("No Katex", mathContent);
-    }
-    try {
-        result = katex.renderToString(mathContent, {displayMode: displayMode});
-    }
-    catch(err) {
-        result = makeErrorMark("Math Convert Error", mathContent);
-    }
-    return '<span class="katex-math"' + sourceLineString + '>' + result + '</span>';
-}
-
-function highLightJs(code, langInfo, isInline, sourceLineString, options) {
-    var highlighted = code;
-    var langClass = '';
-    var langDisplay = langNamesForDisplay[langInfo.toLowerCase()];
-    var langNameDisplay = '';
-        
-    if (langInfo && hljs.getLanguage(langInfo)) {
-        langClass = ' ' + options.langPrefix + langInfo;
-        try {
-            highlighted = hljs.highlight(langInfo, code, true).value;
-        } catch (__) {}
-    }
-
-    if (isInline) {
-        if (langDisplay && options.useShowLangName) {
-            langNameDisplay = ' title="' + langDisplay + '"';
-        }
-        return '<code class="hljs inline' + langClass + '"' + langNameDisplay + '>'
-            + highlighted
-            + '</code>';
-    }
-    else {
-        if (langDisplay && options.useShowLangName) {            
-            langNameDisplay = '<div class="show-language"><div class="show-language-label">' + langDisplay + '</div></div>';
-        }
-        var lineNumbersWrapper = '';
-        var lineNumbersClass = ''; 
-        if (options.useLineNumber) {
-            var match = code.match(/\n(?!$)/g);
-            var linesNum = match ? match.length + 1 : 1;
-            var lines = new Array(linesNum + 1);
-            lineNumbersWrapper = '<span class="line-numbers-rows">' + lines.join('<span></span>') + '</span>';
-            lineNumbersClass = ' line-numbers';
-        }
-
-        return langNameDisplay + '<pre' + sourceLineString + ' class="hljs' + lineNumbersClass + '"><code class="' + langClass + '">'
-            + highlighted + lineNumbersWrapper + '</code></pre>\n';
-    }
-}
 
 module.exports = function(settingOptions) {
     var markdownYt = markdownit();
     var options = markdownYt.utils.assign({}, defaults, settingOptions);
     markdownYt = markdownYt.set(options);
+    
+    function makeErrorMark(title, content) {
+        return "<mark style=\"background-color: red;\" title=\"" + title + "\">" + content + "</mark>";
+    }
+
+    function formatMathContent(mathContent, displayMode, sourceLineString, options) {
+        var result = '';
+        if (typeof katex === "undefined") {
+            result = makeErrorMark("No Katex", mathContent);
+        }
+        try {
+            result = katex.renderToString(mathContent, { displayMode: displayMode });
+        }
+        catch (err) {
+            result = makeErrorMark("Math Convert Error", mathContent);
+        }
+        return '<span class="katex-math"' + sourceLineString + '>' + result + '</span>';
+    }
+
+    function highLightJs(code, langInfo, isInline, sourceLineString, options) {
+        var highlighted = '';
+        var langClass = '';
+        var langDisplay = langNamesForDisplay[langInfo.toLowerCase()];
+        var langNameDisplay = '';
+
+        if (langInfo && hljs.getLanguage(langInfo)) {
+            langClass = ' ' + options.langPrefix + langInfo;
+            try {
+                highlighted = hljs.highlight(langInfo, code, true).value;
+            } catch (__) { 
+                highlighted = markdownYt.utils.escapeHtml(code);
+            }
+        } else {
+            highlighted = markdownYt.utils.escapeHtml(code);
+        }
+
+        if (isInline) {
+            if (langDisplay && options.useShowLangName) {
+                langNameDisplay = ' title="' + langDisplay + '"';
+            }
+            return '<code class="hljs inline' + langClass + '"' + langNameDisplay + '>'
+                + highlighted
+                + '</code>';
+        }
+        else {
+            if (langDisplay && options.useShowLangName) {
+                langNameDisplay = '<div class="show-language"><div class="show-language-label">' + langDisplay + '</div></div>';
+            }
+            var lineNumbersWrapper = '';
+            var lineNumbersClass = '';
+            if (options.useLineNumber) {
+                var match = code.match(/\n(?!$)/g);
+                var linesNum = match ? match.length + 1 : 1;
+                var lines = new Array(linesNum + 1);
+                lineNumbersWrapper = '<span class="line-numbers-rows">' + lines.join('<span></span>') + '</span>';
+                lineNumbersClass = ' line-numbers';
+            }
+
+            return langNameDisplay + '<pre' + sourceLineString + ' class="hljs' + lineNumbersClass + '"><code class="' + langClass + '">'
+                + highlighted + lineNumbersWrapper + '</code></pre>\n';
+        }
+    }
 
     if (options.useAbbr) {
         markdownYt = markdownYt.use(markdownitAbbr);
@@ -10771,7 +10777,9 @@ module.exports = function(settingOptions) {
             return options.highlight(code, '', false, sourceLineString, markdownYt.options);
         }
         else if (options.highlight === true && typeof hljs !== "undefined") {
-            return '<pre' + sourceLineString + ' class="hljs"><code>' + code + '</code></pre>\n';
+            return '<pre' + sourceLineString + ' class="hljs"><code>' 
+                + markdownYt.utils.escapeHtml(code) 
+                + '</code></pre>\n';
         }
         else {
             return  '<pre' + sourceLineString + '><code>'
