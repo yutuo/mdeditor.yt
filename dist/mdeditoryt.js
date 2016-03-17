@@ -10771,7 +10771,7 @@ module.exports = function(settingOptions) {
             return options.highlight(code, '', false, sourceLineString, markdownYt.options);
         }
         else if (options.highlight === true && typeof hljs !== "undefined") {
-            return highLightJs(code, '', false, sourceLineString, markdownYt.options);
+            return '<pre' + sourceLineString + ' class="hljs"><code>' + code + '</code></pre>\n';
         }
         else {
             return  '<pre' + sourceLineString + '><code>'
