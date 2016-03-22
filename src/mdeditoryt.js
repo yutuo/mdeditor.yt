@@ -165,7 +165,12 @@ MdEditorYt.prototype = {
             this.htmlValue.val(htmlValue.replace(/(<\w+[^>]*) data-source-line=(['"])\d+\2([^>]*>)/g, "$1$3"));
         }
         
-        this.previewContainer.html(htmlValue);
+        try {
+            this.previewContainer.html(htmlValue);
+        }
+        catch (err) {
+            // do nothing
+        }
     },
     
     isScrolling: false,    
@@ -174,7 +179,7 @@ MdEditorYt.prototype = {
             return;
         }
         _this.isScrolling = true;
-        console.log("previewScroll");
+
         var lineMarkers = _this.previewContainer.find('[data-source-line]');
         
         function getPreviewScroll() {
@@ -244,7 +249,6 @@ MdEditorYt.prototype = {
         }
         _this.isScrolling = true;
         
-        console.log("cmEditorScroll");
         var lineMarkers = _this.previewContainer.find('[data-source-line]');
         
         function getEditorScroll() {
