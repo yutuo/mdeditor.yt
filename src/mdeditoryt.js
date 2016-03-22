@@ -121,7 +121,7 @@ MdEditorYt.prototype = {
         };
         
         this.cmEditor = new CodeMirror(this.cmContainer.get(0), codeMirrorConfig);
-
+        
         // 预览高度设置
         this.preview.height(this.cmContainer.get(0).offsetHeight);
         this.previewContainer.css('padding-bottom', (this.cmContainer.get(0).offsetHeight - this.cmEditor.display.cachedTextHeight) + 'px')
