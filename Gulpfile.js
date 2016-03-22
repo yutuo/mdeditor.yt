@@ -140,3 +140,15 @@ gulp.task("default", function () {
     //gulp.run("cm-css");
     //gulp.run("cm-js");
 });
+
+gulp.task("cm", function () {
+    gulp.run("cm-css");
+    gulp.run("cm-js");
+});
+
+gulp.task("all", function () {
+    gulp.run("css");
+    gulp.run("js");
+    gulp.run("cm-css");
+    gulp.run("cm-js");
+});
