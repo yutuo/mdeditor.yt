@@ -88,6 +88,7 @@ var cmJsSrcs = [
     cmPath + "/addon/search/searchcursor.js",
     cmPath + "/addon/search/search.js",
     cmPath + "/addon/scroll/annotatescrollbar.js",
+    cmPath + "/addon/scroll/scrollpastend.js",
     cmPath + "/addon/search/matchesonscrollbar.js",
     cmPath + "/addon/display/placeholder.js",
     cmPath + "/addon/edit/closetag.js",

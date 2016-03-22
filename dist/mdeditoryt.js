@@ -10844,6 +10844,7 @@ var defaults = {
     matchWordHighlight: true,
     autoCloseBrackets: true,
     showTrailingSpace: true,
+    scrollPastEnd: true,
     value: '',
     
     delay: 300,
@@ -10897,6 +10898,7 @@ MdEditorYt.prototype = {
             indentUnit: this.options.indentUnit,
             lineNumbers: this.options.lineNumbers,
             lineWrapping: this.options.lineWrapping,
+            scrollPastEnd: this.options.scrollPastEnd,
             value: this.options.value,
             // extraKeys: {
             //     "Ctrl-Q": function (cm) {
@@ -10918,6 +10920,7 @@ MdEditorYt.prototype = {
 
         // 预览高度设置
         this.preview.height(this.cmContainer.get(0).offsetHeight);
+        this.previewContainer.css('padding-bottom', (this.cmContainer.get(0).offsetHeight - this.cmEditor.display.cachedTextHeight) + 'px')
         
         this.markdownYt = new MarkdownYt(this.options);
         
