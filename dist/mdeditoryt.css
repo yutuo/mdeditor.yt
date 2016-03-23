@@ -105,6 +105,10 @@ pre.line-numbers > code {
     line-height: 1.5;
 }
 
+.MdEditorYt .cmContainer .CodeMirror .CodeMirror-linenumbers {
+    padding: 0 3px 0 5px;
+}
+
 .MdEditorYt .previewContainer, .MdEditorYt .previewContainer p {
     font-size: 14px;
     font-family: "Microsoft YaHei", 'Meiryo UI', 'Malgun Gothic', 'Segoe UI', 'Trebuchet MS', Helvetica, Monaco, courier, monospace;

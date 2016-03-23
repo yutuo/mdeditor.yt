@@ -259,21 +259,17 @@ MdEditorYt.prototype = {
                 }
             }
             
-            if (nextMarker === false && lastMarker !== false) {
-                return { lastMarker: lastMarker, nextMarker: lastMarker, percentage: 0 };
-            }
-            
-            var lastLine = 0;
-            var nextLine = _this.previewContainer.outerHeight() - _this.preview.outerHeight();
+            var lastLineHeight = 0;
+            var nextLineHeight = _this.previewContainer.outerHeight() - _this.preview.outerHeight();
             if (lastMarker !== false) {
-                lastLine = lineMarkers[lastMarker].offsetTop;
+                lastLineHeight = lineMarkers[lastMarker].offsetTop;
             }
             if (nextMarker !== false) {
-                nextLine = lineMarkers[nextMarker].offsetTop;
+                nextLineHeight = lineMarkers[nextMarker].offsetTop;
             }
             var percentage = 0;
-            if (nextLine !== lastLine) {
-                percentage = (scroll - lastLine) / (nextLine - lastLine);
+            if (nextLineHeight !== lastLineHeight) {
+                percentage = (scroll - lastLineHeight) / (nextLineHeight - lastLineHeight);
             }
 
             return { lastMarker: lastMarker, nextMarker: nextMarker, percentage: percentage };
@@ -295,12 +291,17 @@ MdEditorYt.prototype = {
             }
             
             var lastLineHeight = 0;
-            var nextLineHeight = _this.cmEditor.getLineHandle(_this.cmEditor.lineCount() - 1).height;
+            var nextLineHeight = 0;
             if (previewScroll.lastMarker !== false) {
                 lastLineHeight = pLineHeights[previewScroll.lastMarker]
             }
             if (previewScroll.nextMarker !== false) {
                 nextLineHeight = pLineHeights[previewScroll.nextMarker]
+            }
+            else {
+                for (var i = 0; i < _this.cmEditor.lineCount(); i++) {
+                    nextLineHeight += _this.cmEditor.getLineHandle(i).height;
+                }
             }
             var scrollTop = ((nextLineHeight - lastLineHeight) * previewScroll.percentage + lastLineHeight);
             _this.cmEditor.scrollTo(0, scrollTop);
@@ -339,14 +340,20 @@ MdEditorYt.prototype = {
                     break;
                 }
             }
+            
             var lastLineHeight = 0;
-            var nextLineHeight = _this.cmEditor.getLineHandle(_this.cmEditor.lineCount() - 1).height;
+            var nextLineHeight = 0;
             if (lastMarker !== false) {
                 lastLineHeight = pLineHeights[lastMarker];
             }
             if (nextMarker !== false) {
                 nextLineHeight = pLineHeights[nextMarker];
-            } 
+            }
+            else {
+                for (var i = 0; i < _this.cmEditor.lineCount(); i++) {
+                    nextLineHeight += _this.cmEditor.getLineHandle(i).height;
+                }
+            }
             var percentage = 0;
             if (nextLineHeight !== lastLineHeight) {
                 percentage = (currentLineHeight - lastLineHeight) / (nextLineHeight - lastLineHeight);
