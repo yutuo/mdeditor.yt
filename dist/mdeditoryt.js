@@ -10853,6 +10853,8 @@ var defaults = {
     mdValueName: '',
     htmlValueName: '',
     
+    onload: function() { },
+    onchange: function() { },
 };
  
 var timer;
@@ -10942,6 +10944,7 @@ MdEditorYt.prototype = {
         
         this.save();
         this.bindChangeEvent();
+        this.options.onload(this);
 
         return this;
     },
@@ -10950,6 +10953,7 @@ MdEditorYt.prototype = {
         var oldTheme = this.cmEditor.getOption('theme');
         this.editor.removeClass('cm-s-' + oldTheme).addClass('cm-s-' + themeName);
         this.cmEditor.setOption("theme", themeName);
+        return this;
     },
 
     bindChangeEvent: function () {
@@ -10959,6 +10963,7 @@ MdEditorYt.prototype = {
                 clearTimeout(timer);
                 _this.save();
                 _this.cmEditorScroll(_this);
+                _this.options.onchange(_this);
                 timer = null;
             }, _this.options.delay);
         });
