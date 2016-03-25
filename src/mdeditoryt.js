@@ -86,7 +86,7 @@ MdEditorYt.prototype = {
         this.options.useSourceLine = this.options.syncScrolling ? true : this.options.useSourceLine;
         // Editor的设置
         this.editor = (typeof id === "object") ? $(id) : $("#" + id);
-        this.editor.addClass('MdEditorYt CodeMirror');
+        this.editor.addClass('MdEditorYt');
         this.editor.css({
             width: (typeof this.options.width === "number") ? this.options.width + "px" : this.options.width,
             height: (typeof this.options.height === "number") ? this.options.height + "px" : this.options.height
@@ -105,7 +105,7 @@ MdEditorYt.prototype = {
         this.editor.append(this.htmlValue);
         
         // CodeMirror的设置
-        this.cmContainer = $('<div class="cmContainer"></div>');
+        this.cmContainer = $('<div class="cmContainer CodeMirror"></div>');
         this.editor.append(this.cmContainer);
         
         var codeMirrorConfig = {
