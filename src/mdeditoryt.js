@@ -105,7 +105,7 @@ MdEditorYt.prototype = {
         this.editor.append(this.htmlValue);
         
         // CodeMirror的设置
-        this.cmContainer = $('<div class="cmContainer CodeMirror"></div>');
+        this.cmContainer = $('<div class="cmContainer"></div>');
         this.editor.append(this.cmContainer);
         
         var codeMirrorConfig = {
@@ -155,7 +155,7 @@ MdEditorYt.prototype = {
     
     setTheme: function(themeName) {
         var oldTheme = this.cmEditor.getOption('theme');
-        this.cmContainer.removeClass('cm-s-' + oldTheme).addClass('cm-s-' + themeName);
+        this.preview.removeClass('cm-s-' + oldTheme).addClass('cm-s-' + themeName);
         this.cmEditor.setOption("theme", themeName);
         return this;
     },
