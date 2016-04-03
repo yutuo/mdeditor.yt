@@ -12,15 +12,21 @@ pre.hljs, pre.hljs code, .show-language {
 .hljs.inline {
     font-family: Consolas,Monaco,"Andale Mono","Ubuntu Mono", monospace;
     font-size: 13px;
-    line-height: 1.3;
+    line-height: 1.4;
     display: inline-block;
     padding: 0 4px;
     vertical-align: middle;
+    border-radius: 3px;
+    margin: 0 2px;
 }
 
 pre.hljs {
     position: relative;
     margin: 0;
+}
+
+pre.hljs code {
+    white-space: pre;
 }
 
 pre.line-numbers {

@@ -4,6 +4,15 @@
 
 ### Dependents
 
+* [CodeMirror](https://github.com/codemirror/codemirror) 5.13.2
+* [KaTeX](https://github.com/Khan/KaTeX) 0.5.1
+* [highlight.js](https://github.com/isagalaev/highlight.js) 9.2.0
+* [Markdown.yt](https://github.com/yutuo/markdown.yt)
+
+### Reference
+
+* [Editor.md](https://github.com/pandao/editor.md)
+* [Markdown Plus](https://github.com/tylingsoft/markdown-plus)
 
 ### License
 

@@ -1,6 +1,6 @@
 {
   "name": "MdEditor.yt",
-  "version": "0.0.1",
+  "version": "0.2.0",
   "description": "Open source online markdown editor.",
   "directories": {
     "doc": "docs",
