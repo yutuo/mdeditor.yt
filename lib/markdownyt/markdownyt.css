@@ -4,8 +4,8 @@ pre.hljs, pre.hljs code, .show-language {
     line-height: 1.2;
     
     -webkit-hyphens: none;
-	-moz-hyphens: none;
-	-ms-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
     hyphens: none;
 }
 
@@ -30,28 +30,28 @@ pre.hljs code {
 }
 
 pre.line-numbers {
-	padding-left: 60px;
-	counter-reset: linenumber;
+    padding-left: 60px;
+    counter-reset: linenumber;
 }
 
 pre.line-numbers > code {
-	position: relative;
+    position: relative;
 }
 
 .line-numbers .line-numbers-rows {
-	position: absolute;
-	pointer-events: none;
-	top: 0px;
+    position: absolute;
+    pointer-events: none;
+    top: 0px;
     font-size: 100%;
-	left: -60px;
-	width: 48px;
-	letter-spacing: -1px;
-	border-right: 1px solid #999;
+    left: -60px;
+    width: 48px;
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
 
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .line-numbers-rows > span {
@@ -73,22 +73,23 @@ pre.line-numbers > code {
 }
 
 .show-language .show-language-label {
-	position: absolute;
+    position: absolute;
     color: black;
-	background-color: #CFCFCF;
-	top: 1px;
+    background-color: #CFCFCF;
+    top: 1px;
     right: 1px;
-	border-radius: 0 0 0 5px;
-	padding: 0 8px 2px 8px;
-	z-index: 1;
-	-webkit-transform: none;
-	-moz-transform: none;
-	-ms-transform: none;
-	-o-transform: none;
-	transform: none;
+    border-radius: 0 0 0 4px;
+    padding: 0 5px 2px 8px;
+    line-height: 1;
+    z-index: 1;
+    -webkit-transform: none;
+    -moz-transform: none;
+    -ms-transform: none;
+    -o-transform: none;
+    transform: none;
     
     -webkit-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }

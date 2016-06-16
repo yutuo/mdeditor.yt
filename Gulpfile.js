@@ -11,6 +11,7 @@ var concat = require("gulp-concat");
 var notify = require("gulp-notify");
 var header = require("gulp-header");
 var minifycss = require("gulp-minify-css");
+var browserify = require('gulp-browserify');
 //var jsdoc        = require("gulp-jsdoc");
 //var jsdoc2md     = require("gulp-jsdoc-to-markdown");
 var pkg = require("./package.json");
@@ -54,14 +55,36 @@ gulp.task("css", function () {
 
 gulp.task("js", function () {
     var jsSrcs = [
-        'lib/markdownyt/markdownyt.js',
         'src/mdeditoryt.js',
     ];
 
     return gulp.src(jsSrcs)
         .pipe(concat("mdeditoryt.js"))
+        .pipe(browserify({standalone: 'MdEditorYt'}))
         .pipe(gulp.dest(dist))
         .pipe(concat("mdeditoryt.min.js"))
+        .pipe(uglify())
+        .pipe(gulp.dest(dist))
+        .pipe(header(headerMiniComment, {
+            pkg: pkg, fileName: function (file) {
+                var name = file.path.split(file.base + "\\");
+                return (name[1] ? name[1] : name[0]).replace(/\\/g, "");
+            }
+        }))
+        .pipe(gulp.dest(dist))
+        .pipe(notify({message: "MdEditorYt js task complete!"}));
+});
+
+gulp.task("jsall", function () {
+    var jsSrcs = [
+        'lib/markdownyt/markdownyt.all.js',
+        'dist/mdeditoryt.js',
+    ];
+
+    return gulp.src(jsSrcs)
+        .pipe(concat("mdeditoryt.all.js"))
+        .pipe(gulp.dest(dist))
+        .pipe(concat("mdeditoryt.all.min.js"))
         .pipe(uglify())
         .pipe(gulp.dest(dist))
         .pipe(header(headerMiniComment, {
@@ -181,7 +204,7 @@ gulp.task("cm-js", function () {
 gulp.task("default", function () {
     gulp.run("css");
     gulp.run("js");
-    //gulp.run("cm-css");
+    gulp.run("jsall");
     //gulp.run("cm-js");
 });
 
@@ -193,6 +216,7 @@ gulp.task("cm", function () {
 gulp.task("all", function () {
     gulp.run("css");
     gulp.run("js");
+    gulp.run("jsall");
     gulp.run("cm-css");
     gulp.run("cm-js");
 });
